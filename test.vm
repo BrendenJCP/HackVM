@@ -1,0 +1,6 @@
+push constant 57
+push constant 28
+and
+push constant 82
+or
+not

@@ -12,9 +12,9 @@ import java.util.*;
 public class HackVM {
 
     public static void main(String[] args) {
-        String path = (args.length == 0) ? "SimpleAdd.vm": args[0];
-        Parser parser = new Parser(openFile(path));
-        CodeWriter codeWriter = new CodeWriter();
+        String path = (args.length == 0) ? "StackTest.vm": args[0];
+        Parser parser = new Parser(openInFile(path));
+        CodeWriter codeWriter = new CodeWriter(openOutFile(path.split("\\.")[0]+".asm"));
         
         parser.advance(); 
         while(parser.hasMoreCommands()){
@@ -24,11 +24,19 @@ public class HackVM {
                 codeWriter.writeArithmetic(parser.arg1());
             parser.advance();
         }
+        codeWriter.close();
     }
     
-    public static BufferedReader openFile(String path){
+    public static BufferedReader openInFile(String path){
         try{
             return new BufferedReader(new FileReader(path));
+        }catch(IOException e){}
+        return null;
+    }
+    
+    public static BufferedWriter openOutFile(String path){
+        try{
+            return new BufferedWriter(new FileWriter(path));
         }catch(IOException e){}
         return null;
     }
