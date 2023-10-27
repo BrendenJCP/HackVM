@@ -1,10 +1,5 @@
-/*
- 
- */
-
 package com.mycompany.hackvm;
 import java.io.*;
-import java.util.*;
 
 /**
 
@@ -12,9 +7,9 @@ import java.util.*;
 public class HackVM {
 
     public static void main(String[] args) {
-        String path = (args.length == 0) ? "StackTest.vm": args[0];
+        String path = (args.length == 0) ? "StaticTest.vm": args[0];
         Parser parser = new Parser(openInFile(path));
-        CodeWriter codeWriter = new CodeWriter(openOutFile(path.split("\\.")[0]+".asm"));
+        CodeWriter codeWriter = new CodeWriter(path.split("\\.")[0]);
         
         parser.advance(); 
         while(parser.hasMoreCommands()){
