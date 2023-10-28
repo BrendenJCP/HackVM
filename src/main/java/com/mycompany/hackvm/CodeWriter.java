@@ -16,6 +16,43 @@ public class CodeWriter {
         this.fileName = fileName;
     }
     
+    public void writeInit(){
+        
+    }
+    
+    public void writeLabel(String label){
+        String fstring = String.format("(%s)\n",label);
+        try{
+            outFile.write(fstring);
+        }catch(IOException e){}
+    }
+    
+    public void writeGoto(String label){
+        String fstring = String.format("@%s\n0;JMP\n",label);
+        try{
+            outFile.write(fstring);
+        }catch(IOException e){}
+    }
+    
+    public void writeIf(String label){
+        String fstring = String.format("@SP\nM=M-1\nA=M\n=M\n@%s\nD;JNE\n",label);
+        try{
+            outFile.write(fstring);
+        }catch(IOException e){}
+    }
+    
+    public void writeCall(String functionName, int numArgs){
+        
+    }
+    
+    public void writeReturn(){
+        
+    }
+    
+    public void writeFunction(String functionName, int numLocals){
+        
+    }
+    
     public void writeArithmetic(String command){
         try{
             switch(command){
