@@ -5,7 +5,7 @@ public class HackVM {
     public static CodeWriter codeWriter;
 
     public static void main(String[] args) {
-        String path = (args.length == 0) ? "FibonacciElement": args[0];
+        String path = (args.length == 0) ? "StaticsTest": args[0];
         codeWriter = new CodeWriter(path.split("\\.")[0]);
         if(path.split("\\.").length<=1){
             codeWriter.writeInit();
