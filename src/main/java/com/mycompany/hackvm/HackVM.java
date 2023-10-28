@@ -7,7 +7,7 @@ import java.io.*;
 public class HackVM {
 
     public static void main(String[] args) {
-        String path = (args.length == 0) ? "FibonacciSeries.vm": args[0];
+        String path = (args.length == 0) ? "SimpleFunction.vm": args[0];
         Parser parser = new Parser(openInFile(path));
         CodeWriter codeWriter = new CodeWriter(path.split("\\.")[0]);
         

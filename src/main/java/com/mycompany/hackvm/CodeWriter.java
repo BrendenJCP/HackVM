@@ -6,10 +6,13 @@ public class CodeWriter {
     private String fileName;
     private int labelNum = 1;
     private int varNum = 1;
+    private String currFuncName;
+    private String pushD = "@SP\nM=M+1\nA=M-1\nM=D\n";
     
     public CodeWriter(String file){
         this.outFile = openOutFile(file+".asm");
         this.fileName = file;
+        currFuncName = null;
     }
     
     public void setFileName(String fileName){
@@ -21,6 +24,9 @@ public class CodeWriter {
     }
     
     public void writeLabel(String label){
+        //Add code to append function name to label
+        if(currFuncName != null)
+            label = currFuncName+"$"+label;
         String fstring = String.format("(%s)\n",label);
         try{
             outFile.write(fstring);
@@ -28,6 +34,8 @@ public class CodeWriter {
     }
     
     public void writeGoto(String label){
+        if(currFuncName != null)
+            label = currFuncName+"$"+label;
         String fstring = String.format("@%s\n0;JMP\n",label);
         try{
             outFile.write(fstring);
@@ -35,6 +43,8 @@ public class CodeWriter {
     }
     
     public void writeIf(String label){
+        if(currFuncName != null)
+            label = currFuncName+"$"+label;
         String fstring = String.format("@SP\nM=M-1\nA=M\n=M\n@%s\nD;JNE\n",label);
         try{
             outFile.write(fstring);
@@ -42,15 +52,47 @@ public class CodeWriter {
     }
     
     public void writeCall(String functionName, int numArgs){
-        
+        String fstring = "";
+        fstring += String.format("@return-%s\nD=A\n", functionName);
+        fstring += pushD;
+        fstring += "@LCL\nD=M\n" + pushD + "@ARG\nD=M\n" + pushD +"@THIS\nD=M\n" + pushD +"@THAT\nD=M\n" + pushD;
+        fstring += String.format("@%d\nD=A\n@SP\nD=M-D\n@5\nD=D-A\n", numArgs);
+        fstring += "@SP\nD=M\n@LCL\nM=D\n";
+        fstring += String.format("@%s\n0;JMP\n", functionName);
+        fstring += String.format("(return-%s)", functionName);
+        try{
+            outFile.write(fstring);
+        }catch(IOException e){}
     }
     
     public void writeReturn(){
+        String fstring = "";
+        fstring += "@LCL\nD=M\n@5\nM=D\n";
+        fstring += "@5\nD=A\nA=M-D\nD=M\n@6\nM=D\n";
+        fstring += "@SP\nM=M-1\nA=M\nD=M\n@ARG\nA=M\nM=D\n";
+        fstring += "@ARG\nD=M+1\n@SP\nM=D\n";
+        fstring += "@5\nA=M-1\nD=M\n@THAT\nM=D\n";
+        fstring += "@5\nD=M\n@2\nA=D-A\nD=M\n@THIS\nM=D\n";
+        fstring += "@5\nD=M\n@3\nA=D-A\nD=M\n@ARG\nM=D\n";
+        fstring += "@5\nD=M\n@4\nA=D-A\nD=M\n@LCL\nM=D\n";
+        fstring += "@6\nA=M\n0;JMP\n";
         
+        try{
+            outFile.write(fstring);
+        }catch(IOException e){}
+        currFuncName = null;
     }
     
     public void writeFunction(String functionName, int numLocals){
-        
+        currFuncName = functionName;
+        String fstring = String.format("(%s)\n",functionName);
+        try{
+            outFile.write(fstring);
+        }catch(IOException e){}
+        for(int i = 0; i < numLocals; i++){
+            writePushPop("C_PUSH", "constant", 0);
+            writePushPop("C_POP", "local", i);
+        }
     }
     
     public void writeArithmetic(String command){
