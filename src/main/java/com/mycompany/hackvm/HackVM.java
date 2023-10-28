@@ -5,11 +5,29 @@ import java.io.*;
 
  */
 public class HackVM {
+    public static CodeWriter codeWriter;
 
     public static void main(String[] args) {
-        String path = (args.length == 0) ? "SimpleFunction.vm": args[0];
+        String path = (args.length == 0) ? "StaticsTest": args[0];
+        codeWriter = new CodeWriter(path.split("\\.")[0]);
+        codeWriter.writeInit();
+        if(path.split("\\.").length<=1){
+            File dir = new File(path);
+            File[] directory = dir.listFiles();
+            for(File file: directory){
+                if(file.getName().split("\\.")[1].equals("vm")){
+                    codeWriter.setFileName(file.getName().split("\\.")[0]);
+                    translateFile(path+"/"+file.getName());
+                }
+            }
+        }
+        else
+            translateFile(path);
+        codeWriter.close();
+    }
+    
+    public static void translateFile(String path){
         Parser parser = new Parser(openInFile(path));
-        CodeWriter codeWriter = new CodeWriter(path.split("\\.")[0]);
         
         parser.advance(); 
         while(parser.hasMoreCommands()){
@@ -26,7 +44,6 @@ public class HackVM {
             }
             parser.advance();
         }
-        codeWriter.close();
     }
     
     public static BufferedReader openInFile(String path){
