@@ -1,17 +1,14 @@
 package com.mycompany.hackvm;
 import java.io.*;
 
-/**
-
- */
 public class HackVM {
     public static CodeWriter codeWriter;
 
     public static void main(String[] args) {
-        String path = (args.length == 0) ? "StaticsTest": args[0];
+        String path = (args.length == 0) ? "FibonacciElement": args[0];
         codeWriter = new CodeWriter(path.split("\\.")[0]);
-        codeWriter.writeInit();
         if(path.split("\\.").length<=1){
+            codeWriter.writeInit();
             File dir = new File(path);
             File[] directory = dir.listFiles();
             for(File file: directory){

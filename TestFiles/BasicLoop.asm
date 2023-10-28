@@ -109,7 +109,7 @@ M=D
 @SP
 M=M-1
 A=M
-=M
+D=M
 @LOOP_START
 D;JNE
 @LCL

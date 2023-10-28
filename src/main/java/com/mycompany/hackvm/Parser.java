@@ -1,14 +1,8 @@
-/*
-
- */
 package com.mycompany.hackvm;
 import java.io.*;
 import java.util.Arrays;
 
-/**
- *
- * @author The Weapon
- */
+
 public class Parser {
     String command;
     BufferedReader programFile;

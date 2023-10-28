@@ -4,10 +4,10 @@ import java.io.*;
 public class CodeWriter {
     private BufferedWriter outFile;
     private String fileName;
+    private String currFuncName;
     private int labelNum = 1;
     private int returnNum = 1;
-    private String currFuncName;
-    private String pushD = "@SP\nM=M+1\nA=M-1\nM=D\n";
+    private final String pushD = "@SP\nM=M+1\nA=M-1\nM=D\n";
     
     public CodeWriter(String name){
         this.outFile = openOutFile(name+".asm");
@@ -22,38 +22,29 @@ public class CodeWriter {
     public void writeInit(){
         String fstring ="";
         fstring += "@256\nD=A\n@SP\nM=D\n";
-        try{
-            outFile.write(fstring);
-        }catch(IOException e){}
+        writeString(fstring);
         writeCall("Sys.init", 0);
     }
     
     public void writeLabel(String label){
-        //Add code to append function name to label
         if(currFuncName != null)
             label = currFuncName+"$"+label;
         String fstring = String.format("(%s)\n",label);
-        try{
-            outFile.write(fstring);
-        }catch(IOException e){}
+        writeString(fstring);
     }
     
     public void writeGoto(String label){
         if(currFuncName != null)
             label = currFuncName+"$"+label;
         String fstring = String.format("@%s\n0;JMP\n",label);
-        try{
-            outFile.write(fstring);
-        }catch(IOException e){}
+        writeString(fstring);
     }
     
     public void writeIf(String label){
         if(currFuncName != null)
             label = currFuncName+"$"+label;
         String fstring = String.format("@SP\nM=M-1\nA=M\nD=M\n@%s\nD;JNE\n",label);
-        try{
-            outFile.write(fstring);
-        }catch(IOException e){}
+        writeString(fstring);
     }
     
     public void writeCall(String functionName, int numArgs){
@@ -65,39 +56,32 @@ public class CodeWriter {
         fstring += "@SP\nD=M\n@LCL\nM=D\n";
         fstring += String.format("@%s\n0;JMP\n", functionName);
         fstring += String.format("(return.%s%d)\n", functionName, returnNum);
-        try{
-            outFile.write(fstring);
-        }catch(IOException e){}
+        writeString(fstring);
         returnNum++;
     }
     
     public void writeReturn(){
         String fstring = "";
-        fstring += "@LCL\nD=M\n@5\nM=D\n";
-        fstring += "@5\nD=A\nA=M-D\nD=M\n@6\nM=D\n";
+        fstring += "@LCL\nD=M\n@R14\nM=D\n";
+        fstring += "@R14\nD=M\n@5\nA=D-A\nD=M\n@R15\nM=D\n";
         fstring += "@SP\nM=M-1\nA=M\nD=M\n@ARG\nA=M\nM=D\n";
         fstring += "@ARG\nD=M+1\n@SP\nM=D\n";
-        fstring += "@5\nA=M-1\nD=M\n@THAT\nM=D\n";
-        fstring += "@5\nD=M\n@2\nA=D-A\nD=M\n@THIS\nM=D\n";
-        fstring += "@5\nD=M\n@3\nA=D-A\nD=M\n@ARG\nM=D\n";
-        fstring += "@5\nD=M\n@4\nA=D-A\nD=M\n@LCL\nM=D\n";
-        fstring += "@6\nA=M\n0;JMP\n";
-        
-        try{
-            outFile.write(fstring);
-        }catch(IOException e){}
+        fstring += "@R14\nA=M-1\nD=M\n@THAT\nM=D\n";
+        fstring += "@R14\nD=M\n@2\nA=D-A\nD=M\n@THIS\nM=D\n";
+        fstring += "@R14\nD=M\n@3\nA=D-A\nD=M\n@ARG\nM=D\n";
+        fstring += "@R14\nD=M\n@4\nA=D-A\nD=M\n@LCL\nM=D\n";
+        fstring += "@R15\nA=M\n0;JMP\n";
+        writeString(fstring);
 //        currFuncName = null;
     }
     
     public void writeFunction(String functionName, int numLocals){
         currFuncName = functionName;
         String fstring = String.format("(%s)\n",functionName);
-        try{
-            outFile.write(fstring);
-        }catch(IOException e){}
+        writeString(fstring);
         for(int i = 0; i < numLocals; i++){
             writePushPop("C_PUSH", "constant", 0);
-            writePushPop("C_POP", "local", i);
+//            writePushPop("C_POP", "local", i);
         }
     }
     
@@ -172,8 +156,12 @@ public class CodeWriter {
             else
                 fstring = String.format("@SP\nM=M-1\n@%s\nD=M\n@%d\nA=A+D\nD=A\n@R13\nM=D\n@SP\nA=M\nD=M\n@R13\nA=M\nM=D\n", seg, index);
         }
+        writeString(fstring);
+    }
+    
+    public void writeString(String string){
         try{
-            outFile.write(fstring);
+            outFile.write(string);
         }catch(IOException e){}
     }
     
